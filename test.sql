@@ -2,7 +2,8 @@
 SELECT * FROM users;
 
 --2
-SELECT * FROM users WHERE '2024-01-01' <= created_at AND created_at <= '2024-12-31';
+SELECT * FROM users
+WHERE created_at BETWEEN '2024-01-01' AND '2024-12-31';
 
 --3
 SELECT * FROM users WHERE age < 30 AND gender = 'female';
@@ -22,7 +23,7 @@ FROM products JOIN order_items
 ON products.id = order_items.product_id;
 
 --7
-SELECT users.name, COUNT(user_id)
+SELECT users.name, COUNT(orders.id)
 FROM users JOIN orders
 ON users.id = orders.user_id
 GROUP BY users.name;
@@ -51,7 +52,7 @@ FROM (
     ON users.id = orders.user_id
     GROUP BY users.name
 ) AS user_totals
-WHERE total_price = (SELECT MAX(total_price) FROM (
+WHERE user_totals.total_price = (SELECT MAX(total_price) FROM (
     SELECT users.name, SUM(products.price * order_items.quantity) AS total_price
     FROM order_items
     JOIN products
@@ -119,9 +120,9 @@ HAVING SUM(order_items.quantity) =
             );
 
 --16
-SELECT MONTH(orders.order_date), COUNT(orders.id)
+SELECT YEAR(orders.order_date), MONTH(orders.order_date), COUNT(orders.id)
 FROM orders
-GROUP BY MONTH(orders.order_date);
+GROUP BY YEAR(orders.order_date), MONTH(orders.order_date);
 
 --17
 SELECT products.product_name, COUNT(order_items.product_id) AS count_items
@@ -150,7 +151,7 @@ GROUP BY users.name) AS sub;
 SELECT users.name, orders.order_date
 FROM users JOIN orders
 ON users.id = orders.user_id
-WHERE orders.order_date IN
+WHERE orders.order_date =
 (SELECT MAX(o.order_date)
 FROM orders AS o
 WHERE o.user_id = users.id);
@@ -180,7 +181,7 @@ UPDATE products SET price = price*1.1;
 
 --27
 UPDATE orders SET order_date = '2024-05-01'
-WHERE YEAR(orders.order_date) <= 2024 AND MONTH(orders.order_date) <5;
+WHERE orders.order_date <'2024-05-01';
 
 --28
 DELETE FROM users
